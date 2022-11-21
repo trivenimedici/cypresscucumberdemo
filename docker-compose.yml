@@ -1,0 +1,61 @@
+# comments to run below docker compse:configs:
+# docker-compose up e2e-electron1 e2e-electron2
+# docker-compose up nodeGenreport
+# docker-compose up nodeAllureGenreport
+# docker-compose up nodeSendEmail
+
+version: '3'
+services:
+  e2e-electron1:
+    image: "image:latest"
+    container_name: test1
+    command: [ "test_partial:Set1" ]
+    # deploy:
+    #   resources:
+    #     limits:
+    #       # cpus: 0.50
+    #       memory: 6144M
+    #     reservations:
+    #       # cpus: 0.25
+    #       memory: 2048M
+
+    volumes:
+      - ./cypress/fixtures/report:/ecomr4/cypress/fixtures/report/
+      - ../results:/results/
+
+  e2e-electron2:
+    image: "image:latest"
+    container_name: test2
+    command: [ "test_partial:Set2" ]
+    # deploy:
+    #   resources:
+    #     limits:
+    #       # cpus: 0.50
+    #       memory: 6144M
+    #     reservations:
+    #       # cpus: 0.25
+    #       memory: 2048M
+
+    volumes:
+      - ./cypress/fixtures/report:/ecomr4/cypress/fixtures/report/
+      - ../results:/results/
+
+  nodeGenreport:
+    image: "image:latest"
+    container_name: test_report_gen
+    command: [ "report_gen" ]
+
+    volumes:
+      - ../results:/results/
+
+  nodeSendEmail:
+    image: "image:latest"
+    container_name: SendMail
+    environment:
+      - BRANCH_NAME
+      - EMAIL_LIST
+    command: [ "SendMail" ]
+
+    volumes:
+      - ./cypress/fixtures/report:/ecomr4/cypress/fixtures/report/
+      - ../results:/results/
