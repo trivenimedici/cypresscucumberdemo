@@ -7,7 +7,7 @@ export AWS_DEFAULT_REGION='us-west-2'
 
 container_name=${bamboo.shortPlanName}
 
-docker build -t cypress-cypadqar . 
+docker build -t cypress-image . 
 
 # Does a container with this name already exist on the agent?
 if docker container ls -a | grep $container_name > /dev/null; then
@@ -19,7 +19,7 @@ if docker container ls -a | grep $container_name > /dev/null; then
     echo removing $(docker rm $container_name)
 fi
 
-docker run --name $container_name -e BRANCH_NAME=${bamboo.planRepository.branchDisplayName} -e EMAIL_LIST="${bamboo.EmailList}" cypress-cypadqar ${bamboo.Suite}
+docker run --name $container_name -e BRANCH_NAME=${bamboo.planRepository.branchDisplayName} -e EMAIL_LIST="${bamboo.EmailList}" cypress-image ${bamboo.Suite}
 docker_run_exit_code=$?
 
 echo Copy results to agent filesystem so we can publish a bamboo artifact with screenshots... 
