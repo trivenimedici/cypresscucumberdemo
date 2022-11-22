@@ -1,0 +1,30 @@
+#!/bin/bash
+
+export AWS_ACCESS_KEY_ID=$bamboo_custom_aws_accessKeyId
+export AWS_SECRET_ACCESS_KEY=$bamboo_custom_aws_secretAccessKey_password
+export AWS_SESSION_TOKEN=$bamboo_custom_aws_sessionToken_password
+export AWS_DEFAULT_REGION='us-west-2'
+
+container_name=${bamboo.shortPlanName}
+
+docker build -t cypress-cypadqar . 
+
+# Does a container with this name already exist on the agent?
+if docker container ls -a | grep $container_name > /dev/null; then
+    echo A container named $container_name already exists...
+    # Is it running?
+    if [ "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then
+        echo stopping $(docker stop $container_name)
+    fi
+    echo removing $(docker rm $container_name)
+fi
+
+docker run --name $container_name -e BRANCH_NAME=${bamboo.planRepository.branchDisplayName} -e EMAIL_LIST="${bamboo.EmailList}" cypress-cypadqar ${bamboo.Suite}
+docker_run_exit_code=$?
+
+echo Copy results to agent filesystem so we can publish a bamboo artifact with screenshots... 
+docker cp $container_name:results results/
+docker rm $container_name
+docker image rm cypress-cypadqar
+
+exit $docker_run_exit_code
