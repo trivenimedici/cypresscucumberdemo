@@ -1,0 +1,49 @@
+#!/bin/bash
+
+export AWS_ACCESS_KEY_ID=$bamboo_custom_aws_accessKeyId
+export AWS_SECRET_ACCESS_KEY=$bamboo_custom_aws_secretAccessKey_password
+export AWS_SESSION_TOKEN=$bamboo_custom_aws_sessionToken_password
+export AWS_DEFAULT_REGION='us-west-2'
+
+export BRANCH_NAME=${bamboo.planRepository.branchDisplayName}
+export EMAIL_LIST="${bamboo.EmailList}"
+export NODE_OPTIONS="--max-old-space-size=8192"
+echo "Branch Name => ${BRANCH_NAME}"
+echo "Branch Email => ${EMAIL_LIST}"
+
+container_name=${bamboo.shortPlanName}
+docker system prune -a -f
+
+docker build -t cypress-image . 
+docker-compose down
+docker container rm test1 test2 test_report_gen  SendMail
+
+# Does a container with this name already exist on the agent?
+if docker container ls -a | grep $container_name > /dev/null; then
+    echo A container named $container_name already exists...
+    # Is it running?
+    if [ "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then
+        echo stopping $(docker stop $container_name)
+    fi
+    echo removing $(docker rm $container_name)
+fi
+
+# docker run --name $container_name -e BRANCH_NAME=${bamboo.planRepository.branchDisplayName} -e EMAIL_LIST="${bamboo.EmailList}" cypress-image ${bamboo.Suite}
+docker-compose up e2e-electron1 e2e-electron2
+# docker_run_exit_code=$?
+docker-compose up nodeGenreport
+docker-compose up nodeSendEmail
+docker_run_exit_code=`docker-compose ps -q | xargs docker inspect -f '{{ .State.ExitCode }}' | grep -v '^0' | wc -l | tr -d ' '`
+
+echo Copy results to agent filesystem so we can publish a bamboo artifact with screenshots... 
+docker cp test_report_gen:results results/
+
+echo Cleaning the container and Images...
+docker-compose down
+docker container prune -f
+docker image rm cypress-cypadqar
+docker images -a | grep none | awk '{ print $3; }' | xargs docker rmi
+docker container ls -a
+docker image ls -a
+
+exit $docker_run_exit_code
