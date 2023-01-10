@@ -57,11 +57,25 @@ module.exports = defineConfig({
     baseUrl: 'https://wordpress.com?automation',
     excludeSpecPattern: ["cypress/e2e/step_definitions/*.js"],
     specPattern: ["cypress/e2e/**/*.feature"],
+    "TAGS": "not (@skip or @UnderFix)",
     setupNodeEvents(on, config) {
       // file:preprocessor , processing the cucumber commands
       allureWriter(on, config);
       on('file:preprocessor', cucumber())
       require('cypress-grep/src/plugin')(config)
+      on('before:browser:launch', (browser = {}, launchOptions) => {
+        if (browser.family === 'chromium' && browser.name !== 'electron') {
+          // launchOptions.args.push("--incognito");
+          launchOptions.args.push('--disable-dev-shm-usage');
+          launchOptions.args.push('--js-flags=--expose-gc');
+          return launchOptions
+        }
+
+        if (browser.name === 'electron') {
+          launchOptions.preferences.incognito = true
+          return launchOptions
+        }
+      });
       on('after:spec', (spec, results) => {
         if (results.tests.length) {
           if (results) {

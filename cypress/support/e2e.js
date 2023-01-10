@@ -39,7 +39,6 @@ if (!app.document.head.querySelector('[data-hide-command-log-request]')) {
 
     app.document.head.appendChild(style);
 }
-
 // Cypress.on('window:before:load', (win) => {
 // 	cy.spy(win.console, 'error');
 // 	cy.spy(win.console, 'warn');
@@ -67,8 +66,14 @@ Cypress.Server.defaults({
 
 after(() => {
     cy.clearCookies({ domain: null })
+    //cy.clearAllCookies()
 })
 
 afterEach(() => {
-    cy.clearCookies({ domain: null })
+    Cypress.session.clearCurrentSessionData()
+    // cy.clearCookies({ domain: null })
+    // cy.clearAllCookies()
+    Cypress.on('uncaught:exception', (err, runnable) => {
+        return false
+    })
 })

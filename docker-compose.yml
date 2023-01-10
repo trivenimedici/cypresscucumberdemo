@@ -6,6 +6,14 @@
 
 version: '3'
 services:
+  cleanfiles:
+    image: "image:latest"
+    container_name: clean_test
+    command: [ "pretest" ]
+
+    volumes:
+      - ../results:/results/
+
   e2e-electron1:
     image: "image:latest"
     container_name: test1

@@ -25,6 +25,8 @@ let failedTest = []
 
 
 module.exports = defineConfig({
+  usernameapi: "username",
+  passwordApi: "test",
   baseApi: 'https://wordpress.com',
   defaultCommandTimeout: 15000,
   responseTimeout: 15000,
@@ -43,6 +45,7 @@ module.exports = defineConfig({
     baseUrl: 'https://wordpress.com',
     baseApi: 'https://wordpress.com',
     TAGS: 'not (@skip or @UnderFix)',
+    testApi: "https://wordpress.com",
   },
   e2e: {
     baseUrl: 'https://wordpress.com?automation',

@@ -1,0 +1,28 @@
+{
+  "baseUrl": "https://wordpress.com",
+  "responseTimeout": 60000,
+  "pageLoadTimeout": 60000,
+  "requestTimeout": 60000,
+  "chromeWebSecurity": false,
+  "ignoreTestFiles": [
+    "**/step_definitions/ui/*.js",
+    "**/step_definitions/api/*.js",
+    "**/resources/*.module.js"
+  ],
+  "screenshotsFolder": "../results/cypress/screenshots",
+  "screenshotOnRunFailure": true,
+  "videosFolder": "../results/cypress/videos",
+  "allure": false,
+  "video": false,
+  "viewportWidth": 1920,
+  "viewportHeight": 1080,
+  "testFiles": "**/*.feature",
+  "retries": 0,
+  "trashAssetsBeforeRuns": true,
+  "env": {
+    "baseUrl": "https://wordpress.com",
+    "URL": "https://wordpress.com/",
+    "baseApi": "https://testapi",
+    "TAGS": "not (@skip or @UnderFix)"
+  }
+}
